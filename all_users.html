@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Coach view{% endblock %}
+{% block content %}
+<section class="admin">
+  <h1>Coach dashboard</h1>
+  <ul class="stats">
+    <li class="c1"><b data-count="{{ stats.total }}">0</b> members</li>
+    <li class="c2"><b data-count="{{ stats.updated }}">0</b> plans updated</li>
+    <li class="c3"><b data-count="{{ stats.goals }}">0</b> different goals</li>
+  </ul>
+
+  <input id="search" class="search" type="search" placeholder="Search by name, ID or goal…" aria-label="Search members">
+
+  {% if not rows %}
+  <div class="card empty">No members yet. <a href="/">Create the first plan</a>.</div>
+  {% endif %}
+
+  <div class="members">
+    {% for r in rows %}
+    {% set u = r.user %}
+    <article class="member card" data-search="{{ (u.username ~ ' ' ~ u.user_id ~ ' ' ~ u.goal)|lower }}">
+      <header>
+        <div class="avatar c{{ loop.index0 % 7 }}">{{ u.username[:1]|upper }}</div>
+        <div class="who"><h2>{{ u.username }}</h2><small>{{ u.user_id }}</small></div>
+        <ul class="tags">
+          <li>{{ u.age }} yrs</li><li>{{ u.weight }} kg</li><li>{{ u.goal|title }}</li>
+          <li class="lvl {{ u.intensity }}">{{ u.intensity|title }}</li>
+          {% if r.updated %}<li class="upd">Updated</li>{% endif %}
+        </ul>
+        <div class="row-actions">
+          <a class="mini" href="/plan/{{ u.user_id }}">Open</a>
+          <button class="mini toggle" type="button">Show plans</button>
+          <form method="post" action="/delete-user/{{ u.user_id }}" onsubmit="return confirm('Delete {{ u.username }} and their plan?')">
+            <button class="mini danger">Delete</button>
+          </form>
+        </div>
+      </header>
+      <div class="plans2" hidden>
+        {% for label, p in [("Original plan", r.original), ("Updated plan", r.updated)] %}
+        {% if p %}
+        <div class="col">
+          <h3>{{ label }}</h3>
+          <ol>
+            {% for d in p.days %}
+            <li class="c{{ loop.index0 % 7 }}"><b>{{ d.day }}</b> {{ d.focus }}
+              <small>{{ d.exercises|length }} exercises</small></li>
+            {% endfor %}
+          </ol>
+        </div>
+        {% endif %}
+        {% endfor %}
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

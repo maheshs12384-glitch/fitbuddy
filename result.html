@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}{{ user.username }}'s plan{% endblock %}
+
+{% macro plan_view(plan, key, hide=false) %}
+<div class="plan" data-plan="{{ key }}" {% if hide %}hidden{% endif %}>
+  <div class="daytabs" role="tablist">
+    {% for d in plan.days %}
+    <button role="tab" class="daytab c{{ loop.index0 % 7 }}{% if loop.first %} on{% endif %}" data-day="{{ loop.index0 }}">
+      <b>{{ d.day }}</b><small>{{ d.focus }}</small>
+    </button>
+    {% endfor %}
+  </div>
+  {% for d in plan.days %}
+  {% set di = loop.index0 %}
+  <article class="daypanel c{{ di % 7 }}" data-day="{{ di }}" {% if not loop.first %}hidden{% endif %}>
+    <h3>{{ d.focus }}</h3>
+    {% if d.warmup %}<p class="phase warm"><span>Warm-up</span>{{ d.warmup }}</p>{% endif %}
+    {% if d.exercises %}
+    <ul class="exlist">
+      {% for e in d.exercises %}
+      <li>
+        <label>
+          <input type="checkbox" data-id="{{ user.user_id }}-{{ key }}-{{ di }}-{{ loop.index0 }}">
+          <span class="box"></span>
+          <span class="exname">{{ e.name }}</span>
+          <span class="tags">
+            {% if e.sets %}<i>{{ e.sets }} sets</i>{% endif %}
+            {% if e.reps %}<i>{{ e.reps }}</i>{% endif %}
+            {% if e.rest and e.rest != '-' %}<i class="rest">rest {{ e.rest }}</i>{% endif %}
+          </span>
+        </label>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="restday">Rest day. Your muscles grow while you recover.</p>
+    {% endif %}
+    {% if d.cooldown %}<p class="phase cool"><span>Cooldown</span>{{ d.cooldown }}</p>{% endif %}
+  </article>
+  {% endfor %}
+</div>
+{% endmacro %}
+
+{% block content %}
+<section class="result">
+  {% if message %}<div class="toast" role="status">{{ message }}</div>{% endif %}
+
+  <div class="summary card">
+    <div>
+      <h1>{{ user.username }}'s week</h1>
+      <p class="muted">ID <b>{{ user.user_id }}</b></p>
+    </div>
+    <ul class="facts">
+      <li class="c1"><small>Age</small>{{ user.age }}</li>
+      <li class="c2"><small>Weight</small>{{ user.weight }} kg</li>
+      <li class="c3"><small>Goal</small>{{ user.goal|title }}</li>
+      <li class="c4"><small>Intensity</small>{{ user.intensity|title }}</li>
+    </ul>
+  </div>
+
+  <div class="tip card">
+    <div class="tip-icon">🥑</div>
+    <div><h2>Nutrition &amp; recovery tip</h2><p>{{ tip }}</p></div>
+  </div>
+
+  <div class="toolbar">
+    {% if updated %}
+    <div class="switch" role="group" aria-label="Plan version">
+      <button class="on" data-version="updated">Updated plan</button>
+      <button data-version="original">Original plan</button>
+    </div>
+    {% else %}<span></span>{% endif %}
+    <div class="progress-wrap">
+      <span id="pcount">0 / 0 done</span>
+      <div class="bar"><div id="pbar"></div></div>
+    </div>
+  </div>
+
+  <div id="plans" data-user="{{ user.user_id }}">
+    {% if updated %}
+      {{ plan_view(updated, 'updated') }}
+      {{ plan_view(original, 'original', true) }}
+    {% else %}
+      {{ plan_view(original, 'original') }}
+    {% endif %}
+  </div>
+
+  {% if last_feedback %}<p class="muted">Last feedback applied: “{{ last_feedback }}”</p>{% endif %}
+
+  <div class="actions">
+    <a class="btn" href="/feedback?user_id={{ user.user_id }}">Give feedback &amp; update plan</a>
+    <button class="btn alt" onclick="window.print()">Print plan</button>
+    <a class="btn ghost" href="/">New plan</a>
+  </div>
+</section>
+{% endblock %}

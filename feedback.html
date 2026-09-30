@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Update your plan{% endblock %}
+{% block content %}
+<section class="narrow">
+  <form class="card form" method="post" action="/submit-feedback" data-loading="Reading your feedback…|Rewriting your plan…|Balancing your week…">
+    <h2>Tell us what to change</h2>
+    <p class="muted">FitBuddy rewrites your plan around your feedback and keeps the original for comparison.</p>
+    {% if error %}<div class="alert">{{ error }}</div>{% endif %}
+    <label class="field">User ID
+      <input name="user_id" required value="{{ user_id }}" placeholder="alex_01">
+    </label>
+    <label class="field">Your feedback
+      <textarea name="feedback" id="fb" required minlength="3" maxlength="500" rows="4" placeholder="e.g. More focus on cardio, and add one more rest day"></textarea>
+    </label>
+    <div class="quick">
+      {% for s in ["More focus on cardio","Include more rest days","Add yoga","Make it easier","Make it harder"] %}
+      <button type="button" class="chip-btn" data-fill="{{ s }}">{{ s }}</button>
+      {% endfor %}
+    </div>
+    <button class="btn" type="submit">Update my plan</button>
+  </form>
+</section>
+{% endblock %}

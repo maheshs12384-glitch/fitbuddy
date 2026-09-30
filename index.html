@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Your AI workout plan{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="hero-copy">
+    <h1>Get <span id="swap" class="swap">stronger</span><br>in 7 days of<br>plans made for you.</h1>
+    <p class="lede">Tell FitBuddy about yourself. It builds a day-by-day workout, adds a nutrition tip, and rewrites the plan whenever you send feedback.</p>
+    <ul class="chips">
+      <li class="c1">7-day plan</li><li class="c2">Nutrition tip</li><li class="c3">Feedback loop</li><li class="c4">Progress tracker</li>
+    </ul>
+  </div>
+
+  <form class="card form" id="plan-form" method="post" action="/generate-workout" data-loading="Building your 7-day plan…|Picking the right exercises…|Adding a nutrition tip…">
+    <h2>Create your plan</h2>
+    {% if error %}<div class="alert">{{ error }}</div>{% endif %}
+
+    <div class="grid2">
+      <label class="field">Name
+        <input name="username" required maxlength="60" placeholder="Alex" value="{{ form.username or '' }}">
+      </label>
+      <label class="field">User ID
+        <input name="user_id" required maxlength="40" pattern="[A-Za-z0-9_\-]+" placeholder="alex_01" title="Letters, numbers, - and _" value="{{ form.user_id or '' }}">
+      </label>
+      <label class="field">Age
+        <input name="age" type="number" min="10" max="100" required placeholder="28" value="{{ form.age or '' }}">
+      </label>
+      <label class="field">Weight (kg)
+        <input name="weight" type="number" min="25" max="350" step="0.1" required placeholder="70" value="{{ form.weight or '' }}">
+      </label>
+    </div>
+
+    <fieldset class="picker">
+      <legend>Fitness goal</legend>
+      <div class="goals">
+        {% for value, emoji, label in goals %}
+        <label class="goal g{{ loop.index0 }}">
+          <input type="radio" name="goal" value="{{ value }}" required {% if (form.goal or 'weight loss') == value %}checked{% endif %}>
+          <span><em>{{ emoji }}</em>{{ label }}</span>
+        </label>
+        {% endfor %}
+      </div>
+    </fieldset>
+
+    <fieldset class="picker">
+      <legend>Workout intensity</legend>
+      <div class="levels">
+        {% for value, label in [("low","Low · easy start"),("medium","Medium · steady"),("high","High · all in")] %}
+        <label class="level l{{ loop.index0 }}">
+          <input type="radio" name="intensity" value="{{ value }}" required {% if (form.intensity or 'medium') == value %}checked{% endif %}>
+          <span>{{ label }}</span>
+        </label>
+        {% endfor %}
+      </div>
+    </fieldset>
+
+    <button class="btn" type="submit">Generate my plan</button>
+  </form>
+</section>
+{% endblock %}
